@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int           @id @default(autoincrement())
+  username        String        @unique
+  password        String
+  name            String
+  aggregate_score Int           @default(0)
+  quiz_count      Int           @default(0)
+  quizzes         Quiz[]
+  user_topics     User_topics[]
+}
+
+model Quiz {
+  id               Int             @id @default(autoincrement())
+  User             User            @relation(fields: [user_id], references: [id])
+  user_id          Int
+  category         Categories      @relation(fields: [category_id], references: [id])
+  category_id      Int
+  topic            Topics          @relation(fields: [topic_id], references: [id])
+  topic_id         Int
+  date_time        DateTime        @default(now())
+  quiz_completed   Boolean
+  questions        Quiz_problems[]
+  image_word       Image_word      @relation(fields: [image_Word_id], references: [id])
+  image_Word_id    Int
+  current_question Int
+}
+
+model Quiz_problems {
+  id          Int      @id @default(autoincrement())
+  quiz        Quiz     @relation(fields: [quiz_id], references: [id])
+  quiz_id     Int
+  user_answer String?
+  question    Question @relation(fields: [question_id], references: [id])
+  question_id Int
+}
+
+model Question {
+  id             Int             @id @default(autoincrement())
+  difficulty     String
+  question       String
+  correct_answer String
+  fun_fact       String
+  category       Categories      @relation(fields: [category_id], references: [id])
+  category_id    Int
+  topic          Topics          @relation(fields: [topic_id], references: [id])
+  topic_id       Int
+  answer_a       String
+  answer_b       String
+  answer_c       String
+  answer_d       String
+  quiz_problems  Quiz_problems[]
+}
+
+model Image_word {
+  id            Int        @id @default(autoincrement())
+  topic_word    String
+  image_url     String
+  topic         Topics     @relation(fields: [topic_id], references: [id])
+  topic_id      Int
+  category      Categories @relation(fields: [categories_id], references: [id])
+  categories_id Int
+  Quiz          Quiz[]
+}
+
+model User_topics {
+  id       Int    @id @default(autoincrement())
+  User     User   @relation(fields: [user_id], references: [id])
+  user_id  Int
+  Topics   Topics @relation(fields: [topic_id], references: [id])
+  topic_id Int
+}
+
+model Categories {
+  id              Int                 @id @default(autoincrement())
+  name            String
+  Category_topics Categories_topics[]
+  Quiz            Quiz[]
+  Question        Question[]
+  Image_Word      Image_word[]
+}
+
+model Topics {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  user_topics       User_topics[]
+  Quiz              Quiz[]
+  Question          Question[]
+  Categories_topics Categories_topics[]
+  Image_Word        Image_word[]
+}
+
+model Categories_topics {
+  id          Int        @id @default(autoincrement())
+  Categories  Categories @relation(fields: [category_id], references: [id])
+  category_id Int
+  topic       Topics     @relation(fields: [topic_id], references: [id])
+  topic_id    Int
+}
